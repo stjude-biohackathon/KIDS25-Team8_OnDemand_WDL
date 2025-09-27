@@ -1,0 +1,67 @@
+# Job submission configuration file
+#
+---
+
+#
+# Configure the content of the job script for the batch job here
+# @see http://www.rubydoc.info/gems/ood_core/OodCore/BatchConnect/Template
+#
+batch_connect:
+  # We use the basic web server template for generating the job script
+  #
+  # @note Do not change this unless you know what you are doing!
+  template: "basic"
+
+  # You can override the command used to query the hostname of the compute node
+  # here
+  #
+  # @note It is **highly** recommended this be set in the global cluster
+  #   configuration file so that all apps can take advantage of it by default
+  #
+  #set_host: "host=$(hostname -A | awk '{print $2}')"
+
+#
+# Configure the job script submission parameters for the batch job here
+# @see http://www.rubydoc.info/gems/ood_core/OodCore/Job/Script
+#
+script:
+  native:
+    # Project/Job title
+    - "-P"
+    - "ood_nextflow"
+    # Keep GPUs optional, only if job is on a gpu queue request gpus
+    <% if gpu_job == "true" %>
+    - "-J" 
+    - "ood_nextflow_<%= num_cores.to_i %>CPU_<%= num_gpus.to_i %>GPU_<%= mem_size.to_i %>MEM_<%= bc_num_hours.to_i %>hr"
+    - "-gpu" 
+    - "num=<%= num_gpus.to_i %>/host"
+    # GPU Type
+    <% if gpu_type == "a100" %>
+    - "-R"
+    - "a100"
+    <% end %>
+    <% if gpu_type == "v100" %>
+    - "-R"
+    - "v100"
+    <% end %>
+    <% else %>
+    - "-J" 
+    - "ood_nextflow_<%= num_cores.to_i %>CPU_<%= mem_size.to_i %>MEM_<%= bc_num_hours.to_i %>hr"
+    <% end %>
+    # Number of cores the ser wants
+    - "-n"
+    - "<%= num_cores.to_i %>"
+    # Queue choice
+    - "-q"
+    - "<%= choose_queue %>"
+    # Memory size
+    - "-R"
+    - "rusage[mem=<%= mem_size %>]"
+    # Tile cores on a single host
+    <% if single_node.to_i == 0 %>
+    - "-R"
+    - "span[hosts=1]"
+    <% end %>
+    # Wall time for job
+    - "-W"
+    - "<%= bc_num_hours.to_i %>:00"

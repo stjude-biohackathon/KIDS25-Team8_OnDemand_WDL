@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# Benchmark info
+echo "-- TIMING - Starting main script at: $(date)"
+
+working_dir="/scratch_space/$USER/nextflow/<%= context.run_uid %>"
+
+# Set working directory to home directory
+cd ${working_dir}
+
+#
+# Start Nextflow Pipeline
+#
+
+<%- unless context.modules.blank? -%>
+# Purge the module environment to avoid conflicts
+module purge
+
+# Load the require modules
+module load <%= context.modules %>
+
+# List loaded modules
+module list
+<%- end -%>
+
+# Benchmark info
+echo "-- TIMING - Starting {{ <%= context.pipeline_name %> }} at: $(date)"
+
+# Debug output
+#set -x
+
+#
+# nextflow setup
+#
+# Singularity cache directory
+export NXF_SINGULARITY_CACHEDIR="/lustre_scratch/shared_scratch/nf-core/singularity-images/"
+# Setup user directory
+mkdir /scratch_space/$USER/nextflow/<%= context.run_uid %>
+
+# Pull the pipeline from a URL
+nextflow pull <%= context.pipeline_url %>
+
+# Run nextflow
+nextflow run <%= context.pipeline_url %> \
+  -resume <%= context.run_uid %> \
+  <%- unless context.version.blank? -%>
+  -r <%= context.version %> \
+  <%- end -%>
+  -profile stjude \
+  -work-dir ${working_dir} \
+  -params-file <%= context.nextflow_params %> \
+  <%- if context.custom_config.blank? -%>
+  <%- else -%>
+  -c <%= context.custom_config %>
+  <%- end -%>

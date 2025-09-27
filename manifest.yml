@@ -1,0 +1,13 @@
+---
+name: Nextflow
+category: Interactive Apps
+subcategory: Pipeline
+role: batch_connect
+description: >
+  This app allows users to launch properly configured jobs to run Nextflow pipelines with the LSF executor backend. 
+  You are required to input a `params` JSON or YAML file with pipeline inputs. 
+  If a task fails due to running out of memory, it will automatically be retried with twice the memory (up to three times).
+  Runs that previously failed can be resumed by reusing the same "Run Unique Name" to pick up where they left off.
+  While designed for [nf-core pipelines](https://nf-co.re/pipelines/), 
+  this app should be able to run any Nextflow pipeline with [minor modifications](https://nf-co.re/docs/tutorials/external_usage/nf-core_configs_outside_nf-core)
+  to utilize the [St. Jude nf-core institutional config profile](https://nf-co.re/configs/stjude/).
