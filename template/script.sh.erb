@@ -3,13 +3,15 @@
 # Benchmark info
 echo "-- TIMING - Starting main script at: $(date)"
 
-working_dir="/scratch_space/$USER/nextflow/<%= context.run_uid %>"
+workdir="/scratch_space/$USER/sprocket"
+configfile="$(pwd)/sprocket.toml"
 
 # Set working directory to home directory
-cd ${working_dir}
+mkdir -p ${workdir}
+cd ${workdir}
 
 #
-# Start Nextflow Pipeline
+# Start WDL Pipeline
 #
 
 <%- unless context.modules.blank? -%>
@@ -24,32 +26,10 @@ module list
 <%- end -%>
 
 # Benchmark info
-echo "-- TIMING - Starting {{ <%= context.pipeline_name %> }} at: $(date)"
+echo "-- TIMING - Starting \`<%= context.workflow %>\` at: $(date)"
 
 # Debug output
 #set -x
 
-#
-# nextflow setup
-#
-# Singularity cache directory
-export NXF_SINGULARITY_CACHEDIR="/lustre_scratch/shared_scratch/nf-core/singularity-images/"
-# Setup user directory
-mkdir /scratch_space/$USER/nextflow/<%= context.run_uid %>
-
-# Pull the pipeline from a URL
-nextflow pull <%= context.pipeline_url %>
-
-# Run nextflow
-nextflow run <%= context.pipeline_url %> \
-  -resume <%= context.run_uid %> \
-  <%- unless context.version.blank? -%>
-  -r <%= context.version %> \
-  <%- end -%>
-  -profile stjude \
-  -work-dir ${working_dir} \
-  -params-file <%= context.nextflow_params %> \
-  <%- if context.custom_config.blank? -%>
-  <%- else -%>
-  -c <%= context.custom_config %>
-  <%- end -%>
+# Run sprocket
+sprocket -v -c "$configfile" run <%- unless context.entrypoint.blank? -%>--entrypoint <%= context.entrypoint %><%- end -%> <%= context.workflow %> <%= context.inputs %>

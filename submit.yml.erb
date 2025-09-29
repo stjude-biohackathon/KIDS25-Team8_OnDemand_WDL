@@ -1,7 +1,6 @@
 # Job submission configuration file
 #
 ---
-
 #
 # Configure the content of the job script for the batch job here
 # @see http://www.rubydoc.info/gems/ood_core/OodCore/BatchConnect/Template
@@ -26,42 +25,15 @@ batch_connect:
 #
 script:
   native:
-    # Project/Job title
     - "-P"
-    - "ood_nextflow"
-    # Keep GPUs optional, only if job is on a gpu queue request gpus
-    <% if gpu_job == "true" %>
+    - "sprocket"
     - "-J" 
-    - "ood_nextflow_<%= num_cores.to_i %>CPU_<%= num_gpus.to_i %>GPU_<%= mem_size.to_i %>MEM_<%= bc_num_hours.to_i %>hr"
-    - "-gpu" 
-    - "num=<%= num_gpus.to_i %>/host"
-    # GPU Type
-    <% if gpu_type == "a100" %>
-    - "-R"
-    - "a100"
-    <% end %>
-    <% if gpu_type == "v100" %>
-    - "-R"
-    - "v100"
-    <% end %>
-    <% else %>
-    - "-J" 
-    - "ood_nextflow_<%= num_cores.to_i %>CPU_<%= mem_size.to_i %>MEM_<%= bc_num_hours.to_i %>hr"
-    <% end %>
-    # Number of cores the ser wants
+    - "sprocket<%= num_cores.to_i %>CPU_<%= mem_size.to_i %>MEM_<%= bc_num_hours.to_i %>hr"
     - "-n"
     - "<%= num_cores.to_i %>"
-    # Queue choice
     - "-q"
-    - "<%= choose_queue %>"
-    # Memory size
+    - "<%= queue %>"
     - "-R"
     - "rusage[mem=<%= mem_size %>]"
-    # Tile cores on a single host
-    <% if single_node.to_i == 0 %>
-    - "-R"
-    - "span[hosts=1]"
-    <% end %>
-    # Wall time for job
     - "-W"
     - "<%= bc_num_hours.to_i %>:00"

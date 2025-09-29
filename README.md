@@ -1,4 +1,4 @@
-# Nextflow via OnDemand
+# WDL via OnDemand
 
 The command line is dead to me, long live pipeline submission via eyeball tracking.
 
