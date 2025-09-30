@@ -5,6 +5,6 @@ experimental_features_enabled = true
 # Set the default backend to LSF + Apptainer
 [run.backends.default]
 type = "lsf_apptainer"
-queue = "<%= context.queue %>"
+default_lsf_queue = "<%= context.queue %>"
 max_scatter_concurrency = <%= context.max_scatter_concurrency %>
 apptainer_images_dir = "<%= context.apptainer_images_dir %>"

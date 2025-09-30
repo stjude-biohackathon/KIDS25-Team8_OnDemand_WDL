@@ -10,7 +10,7 @@
 cluster: hpc
 
 attributes:
-  modules: "sprocket/0.17.1+515"
+  modules: "sprocket/0.17.1+520"
 
   queue: 
     widget: select
@@ -37,6 +37,7 @@ attributes:
     data-target-file-type: files
     readonly: false
     required: true
+    placeholder: "<path or URL to workflow>"
 
   inputs:
     label: WDL Workflow Inputs
@@ -44,20 +45,20 @@ attributes:
     data-filepicker: true
     data-target-file-type: files
     readonly: false
+    placeholder: "<path to inputs>"
 
   entrypoint:
     label: Entrypoint
     help: The name of WDL workflow or task to run; required if `inputs` is empty.
-    data-filepicker: true
-    data-target-file-type: files
-    readonly: false
+    placeholder: "<name of workflow>"
 
-  sprocket_config:
+  config:
     label: Sprocket Configuration File
     help: Select your custom Sprocket configuration file (leave blank to use the default).
     data-filepicker: true
     data-target-file-type: files
     readonly: false
+    placeholder: "<path to config>"
 
   max_scatter_concurrency:
     label: Max Scatter Concurrency
@@ -79,6 +80,7 @@ attributes:
     data-filepicker: true
     data-target-file-type: dirs
     readonly: false
+    placeholder: "<path to cache directory>"
 
   bc_num_hours:
     help: The maximum number of hours the submitted batch job may run.
@@ -89,9 +91,7 @@ form:
   - workflow
   - inputs
   - entrypoint
-  # Currently this is disabled because we can't explicitly specify more than one
-  # configuration file. This will need a change to `sprocket`.
-  # - sprocket_config
+  - config
   - max_scatter_concurrency
   - apptainer_images_dir
   - num_cores
