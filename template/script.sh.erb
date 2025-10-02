@@ -32,5 +32,4 @@ echo "-- TIMING - Starting \`<%= context.workflow %>\` at: $(date)"
 #set -x
 
 # Run sprocket
-# TODO: remove the `true ||` from `unless` below once https://github.com/stjude-rust-labs/sprocket/pull/383 merges
-sprocket -v <%- unless true || context.config.blank? -%>-c <%= context.config %><%- end -%> -c "$configfile" run <%- unless context.entrypoint.blank? -%>--entrypoint <%= context.entrypoint %><%- end -%> <%= context.workflow %> <%= context.inputs %>
+sprocket -v <%- unless context.config.blank? -%>-c <%= context.config %><%- end -%> -c "$configfile" run <%- unless context.entrypoint.blank? -%>--entrypoint <%= context.entrypoint %><%- end -%> <%= context.workflow %> <%= context.inputs %>
