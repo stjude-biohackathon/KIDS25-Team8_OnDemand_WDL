@@ -1,0 +1,11 @@
+# The new backend will not work unless you bravely opt in to experimental features
+[run]
+backend = "ondemand"
+experimental_features_enabled = true
+
+# Set the default backend to LSF + Apptainer
+[run.backends.ondemand]
+type = "lsf_apptainer"
+default_lsf_queue = "<%= context.queue %>"
+max_scatter_concurrency = <%= context.max_scatter_concurrency %>
+apptainer_images_dir = "<%= context.apptainer_images_dir %>"

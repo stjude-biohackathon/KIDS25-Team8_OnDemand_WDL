@@ -1,166 +1,99 @@
 # Batch Connect app configuration file
-#
-# @note Used to define the submitted cluster, title, description, and
-#   hard-coded/user-defined attributes that make up this Batch Connect app.
+
 <%-
   cpu_queues = OodAppkit.clusters[:hpc].custom_config[:cpu_queues]
-  gpu_queues = OodAppkit.clusters[:hpc].custom_config[:gpu_queues]
-  gpu_select_queues = OodAppkit.clusters[:hpc].custom_config[:gpu_select_queues]
 -%>
 ---
 
 # **MUST** set cluster id here that matches cluster configuration file located
 # under /etc/ood/config/clusters.d/*.yml
-cluster: "hpc"
+cluster: hpc
 
-# Define attribute values that aren't meant to be modified by the user within
-# the Dashboard form
 attributes:
-  # Set the corresponding modules that need to be loaded for Jupyter to run
-  #
-  # @note It is called within the batch job as `module load <modules>` if
-  #   defined
-  # @example Do not load any modules
-  #     modules: ""
-  # @example Using default python module
-  #     modules: "python"
-  # @example Using specific python module
-  #     modules: "python/3.5"
-  # @example Using combination of modules
-  #     modules: "python/3.5 cuda/8.0.44"
-  #modules: "jupyter/py-3.12"
-  modules: "Nextflow/24.10.2"
+  modules: "sprocket/0.17.1+520"
 
-  choose_queue: 
-    widget: "select"
-    label: "Queue"
-    help: "Please select a queue from the drop-down."
+  queue: 
+    widget: select
+    required: true
+    label: Queue
+    help: Please select a jobs queue for running WDL tasks.
     options:
     <%- cpu_queues.each do |q| -%>
       - [ "<%= q %>", "<%= q %>", data-set-gpu-job: 'false', data-hide-num-gpus: true, data-hide-gpu-type: true ]
     <%- end -%>
   
-  single_node: 1
-  #  widget: "check_box"
-  #  label: "Request Cores on Multiple Nodes"
-  #  checked_value: 1
-  #  unchecked_value: 0
-  #  help: |
-  #    Please check this box if you would like to distribute your request cores over multiple hosts.
-
-  num_gpus: 
-    widget: "number_field"
-    label: "Number of GPUs"
-    value: 1
-    help: |
-      Number of GPUs (default 1).
-    min: 1
-    max: 8
-    step: 1
-
-  gpu_job:
-    widget: "hidden_field"
-  
+  # This is the number of cores and memory to give sprocket itself
+  # The WDL workflow will determine the cpu/memory given to subjobs.
   num_cores: 1
-  #  widget: "number_field"
-  #  label: "Number of cores"
-  #  value: 1
-  #  help: |
-  #    Number of cores on node type.
-  #  min: 1
-  #  max: 28
-  #  step: 1
-  
-  mem_size: 16000
-  #  widget: "number_field"
-  #  label: "Memory Size (MB)"
-  #  value: 4000
-  #  help: |
-  #    Size of memory to request per core (default 4 GB per core).
-  #  min: 2000
-  #  max: 32000
-  #  step: 500
+  mem_size: 2048
 
-  gpu_type:
-    widget: "select"
-    label: "GPU Type"
-    options:
-      - [
-        "any", "any"
-      ]
-      - [
-        "A100", "a100"
-      ]
-      - [
-        "A100 80GB", "a100_80"
-      ]
-
- 
   ################
   # App Specific #
   ################
-  #
-  pipeline_name:
-    widget: "text_field"
-    label: "Pipeline Name or URL"
-    help: >
-      The name or URL of the Nextflow pipeline you want to run.
-      Pipelines hosted on Github can be launched with just the name.
-      For example, `nf-core/rnaseq`, where "nf-core" is the user and "rnaseq" is the repository.
-      If the pipeline is not hosted on Github, a full URL is required.
+  workflow:
+    label: WDL Workflow File
+    help: Select your WDL workflow (this may be a URL).
+    data-filepicker: true
+    data-target-file-type: files
+    readonly: false
+    required: true
+    placeholder: "<path or URL to workflow>"
 
-  version: 
-  widget: "text_field"
-  label: "Nextflow Pipeline Version"
-  help: >
-    Leave blank to run the latest. 
-    If you are running an nf-core pipeline, you have the option of using `dev`. 
-    It's highly recommended to use versioned releases of pipelines.
+  inputs:
+    label: WDL Workflow Inputs
+    help: Inputs can be either paths to JSON or YAML files containing inputs or key-value pairs passed in on the command line to Sprocket.
+    data-filepicker: true
+    data-target-file-type: files
+    readonly: false
+    placeholder: "<path to inputs>"
 
-  run_uid:
-    widget: "text_field"
-    label: "Run Unique Name"
+  entrypoint:
+    label: Entrypoint
+    help: The name of WDL workflow or task to run; required if `inputs` is empty.
+    placeholder: "<name of workflow>"
+
+  config:
+    label: Sprocket Configuration File
+    help: Select your custom Sprocket configuration file (leave blank to use the default).
+    data-filepicker: true
+    data-target-file-type: files
+    readonly: false
+    placeholder: "<path to config>"
+
+  max_scatter_concurrency:
+    label: Max Scatter Concurrency
     help: |
-      The run's name should be unique and must be reused to resume running a pipeline.
-  
-  custom_config:
-    label: "Custom Configuration File"
+      The maximum number of subtasks each `scatter` will try executing at once. This is *not* a direct
+      limit on the total number of concurrent tasks, but can affect the number of jobs that get queued
+      at one time.
+    widget: number_field
+    value: 100
+    min: 1
+    max: 1000
+
+  apptainer_images_dir:
+    label: Apptainer Images Cache
+    help: |
+      The directory where container `.sif` images will be cached (leave blank to use the default).
+      Be sure to regularly clear this directory out.
     data-filepicker: true
-    data-target-file-type: files # Valid values are: files, dirs, or both
+    data-target-file-type: dirs
     readonly: false
-    help: "Select your custom configuration file; leave blank to use the default (recommended unless you know what you're doing)."
+    placeholder: "<path to cache directory>"
 
-  nextflow_params:
-    label: "Nextflow Params File"
-    data-filepicker: true
-    data-target-file-type: files # Valid values are: files, dirs, or both
-    readonly: false
-    help: "Select your parameters file (JSON or YAML)."
+  bc_num_hours:
+    help: The maximum number of hours the submitted batch job may run.
 
-
-
-# All of the attributes that make up the Dashboard form (in respective order),
-# and made available to the submit configuration file and the template ERB
-# files
-#
-# @note You typically do not need to modify this unless you want to add a new
-#   configurable value
-# @note If an attribute listed below is hard-coded above in the `attributes`
-#   option, then it will not appear in the form page that the user sees in the
-#   Dashboard
 form:
   - modules
-  - choose_queue
-  - pipeline_name
-  - version
-  - run_uid
+  - queue
+  - workflow
+  - inputs
+  - entrypoint
+  - config
+  - max_scatter_concurrency
+  - apptainer_images_dir
   - num_cores
-  - single_node
   - mem_size
-  - num_gpus
-  - gpu_job
-  - gpu_type
-  - nextflow_params
-  - custom_config
   - bc_num_hours
   - bc_email_on_started
